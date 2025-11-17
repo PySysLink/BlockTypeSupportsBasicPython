@@ -1,0 +1,14 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(PySysLinkBase REQUIRED)
+
+# Specify the include directories and libraries
+set_and_check(BLOCK_TYPE_SUPPORTS_BASIC_PYTHON_SUPPORT_INCLUDE_DIRS "@PACKAGE_INCLUDE_DIRS@")
+set_and_check(BLOCK_TYPE_SUPPORTS_BASIC_PYTHON_SUPPORT_LIBRARIES "@PACKAGE_LIBRARIES@")
+
+# Set include directories for BlockTypeSupportsBasicPythonSupport
+set(BlockTypeSupportsBasicPythonSupport_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include")
+set(BlockTypeSupportsBasicPythonSupport_LIBRARIES "@PACKAGE_LIBRARIES@")
+
+include("${CMAKE_CURRENT_LIST_DIR}/BlockTypeSupportsBasicPythonSupportTargets.cmake")
