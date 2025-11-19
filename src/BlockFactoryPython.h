@@ -25,7 +25,6 @@ public:
         if (!Py_IsInitialized())
         {
             Py_Initialize();
-            PyEval_InitThreads(); // deprecated but optional for GIL
         }
     }
 

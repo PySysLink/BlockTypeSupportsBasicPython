@@ -1,7 +1,6 @@
 # Define the shared library
 add_library(BlockTypeSupportsBasicPythonSupport SHARED RegisterBlockFactories.cpp
             RegisterBlockFactories.cpp
-            SimulationBlockPython.cpp
             LoggerInstance.cpp)
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)

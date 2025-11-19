@@ -21,6 +21,7 @@
 #include <spdlog/spdlog.h>
 
 #include "ConfigurationValueManager.h"
+#include "SimulationBlockPythonConversions.h"
 
 namespace BlockTypeSupports::BasicPythonSupport
 {
@@ -50,6 +51,11 @@ public:
         // read configuration
         moduleName = PySysLinkBase::ConfigurationValueManager::TryGetConfigurationValue<std::string>("PythonModule", blockConfiguration);
         className = PySysLinkBase::ConfigurationValueManager::TryGetConfigurationValue<std::string>("PythonClass", blockConfiguration);
+
+        std::vector<PySysLinkBase::SampleTimeType> supportedSampleTimeTypes = {};
+        supportedSampleTimeTypes.push_back(PySysLinkBase::SampleTimeType::continuous);
+        supportedSampleTimeTypes.push_back(PySysLinkBase::SampleTimeType::discrete);
+        this->sampleTime = std::make_shared<PySysLinkBase::SampleTime>(PySysLinkBase::SampleTimeType::inherited, supportedSampleTimeTypes);
 
         // optional: number of ports
         try {
@@ -167,7 +173,7 @@ public:
         {
             auto inputValue = this->inputPorts[i]->GetValue();
             auto inputValueSignal = inputValue->TryCastToTyped<T>();
-            PyObject* pyv = this->ToPyObject(inputValueSignal->GetPayload());
+            PyObject* pyv = ToPyObject<T>(inputValueSignal->GetPayload());
             PyList_SetItem(pyInputs, (Py_ssize_t)i, pyv); // steals reference
         }
 
@@ -204,7 +210,7 @@ public:
         for (size_t i = 0; i < outputPorts.size(); ++i)
         {
             PyObject* item = PySequence_Fast_GET_ITEM(seq, (Py_ssize_t)i); // borrowed reference
-            T val = this->FromPyObject(item);
+            T val = FromPyObject<T>(item);
             std::shared_ptr<PySysLinkBase::UnknownTypeSignalValue> outputValue = this->outputPorts[i]->GetValue();
             auto outputValueSignal = outputValue->TryCastToTyped<T>();
             outputValueSignal->SetPayload(val);
@@ -253,15 +259,7 @@ private:
         }
         PyGILState_Release(gstate);
     }
-
-    T FromPyObject(PyObject* obj) const;
-    
-    PyObject* ToPyObject(const T& v) const;
 };
-
-extern template class SimulationBlockPython<double>;
-extern template class SimulationBlockPython<std::complex<double>>;
-
 
 } // namespace BlockTypeSupports::BasicPythonSupport
 
