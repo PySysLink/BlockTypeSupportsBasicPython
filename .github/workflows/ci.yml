@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [ '**' ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ '**' ]
+  workflow_dispatch:  
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the repository
+      - uses: actions/checkout@v3
+
+      # Install required packages. Adjust the list according to your project requirements.
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+          gcc-9 g++-9 \
+          build-essential \
+          rpm \
+          dpkg \
+          cmake \
+          wget \
+          ninja-build \
+          python3-dev \
+
+          # Optional: Set gcc-9/g++-9 as default
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 100
+          
+          gcc --version
+          g++ --version
+
+          wget https://github.com/PySysLink/PySysLinkBase/releases/download/v0.1.0/PySysLinkBase-0.1.0-Linux-x86_64.deb && \
+          sudo dpkg -i PySysLinkBase-0.1.0-Linux-x86_64.deb || true 
+
+
+
+      # Configure the project with tests enabled
+      - name: Configure CMake no tests
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_C_COMPILER=gcc-9 -DCMAKE_CXX_COMPILER=g++-9
+
+      # Build the project using make
+      - name: Build
+        run: |
+          cd build
+          make
+          sudo make install
+
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: BlockTypeSupportsBasicPythonSupport-artifacts
+          path: |
+            build/basic_python_support.*.pslkbtsp.yaml
+            build/src/libBlockTypeSupportsBasicPythonSupport*
+    
