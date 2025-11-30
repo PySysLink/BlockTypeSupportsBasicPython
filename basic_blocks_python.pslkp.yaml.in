@@ -1,0 +1,30 @@
+pluginName: basic_blocks_python
+pluginType: coreBlockLibrary
+blockType: BasicPython
+version: @PROJECT_VERSION@
+dependsOn:
+  - name: BlockTypesBasicPython
+    version: @PROJECT_VERSION@
+blockLibraries:
+  - name: BasicBlocksPython
+    blockTypes:
+      - name: BasicPython
+        configurationValues:
+          - name: PythonModule
+            defaultValue: ""
+            type: string
+          - name: PythonClass
+            defaultValue: ""
+            type: string
+          - name: InputPortNumber
+            defaultValue: 1
+            type: int
+          - name: OutputPortNumber
+            defaultValue: 1
+            type: int
+          - name: Parameters
+            type: string[]
+            defaultValue:
+            - SampleParameter:1.0
+    
+      

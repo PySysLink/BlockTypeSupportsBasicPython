@@ -59,12 +59,12 @@ public:
 
         // optional: number of ports
         try {
-            numInputs = PySysLinkBase::ConfigurationValueManager::TryGetConfigurationValue<int>("NumInputs", blockConfiguration);
+            numInputs = PySysLinkBase::ConfigurationValueManager::TryGetConfigurationValue<int>("InputPortNumber", blockConfiguration);
         } catch(std::out_of_range&) {
             numInputs = 1;
         }
         try {
-            numOutputs = PySysLinkBase::ConfigurationValueManager::TryGetConfigurationValue<int>("NumOutputs", blockConfiguration);
+            numOutputs = PySysLinkBase::ConfigurationValueManager::TryGetConfigurationValue<int>("OutputPortNumber", blockConfiguration);
         } catch(std::out_of_range&) {
             numOutputs = 1;
         }
@@ -85,6 +85,19 @@ public:
 
         // Prepare python and instantiate the class
         PyGILState_STATE gstate = PyGILState_Ensure();
+
+        PyObject* sysPath = PySys_GetObject("path");  // borrowed ref
+        Py_ssize_t n = PyList_Size(sysPath);
+
+        spdlog::info("Python sys.path has {} entries:", n);
+
+        for (Py_ssize_t i = 0; i < n; ++i) {
+            PyObject* item = PyList_GetItem(sysPath, i);  // borrowed ref
+            const char* pathStr = PyUnicode_AsUTF8(item);
+            if (pathStr) {
+                spdlog::info("  [{}] {}", i, pathStr);
+            }
+        }
 
         PyObject* pyName = PyUnicode_FromString(moduleName.c_str());
         pyModule = PyImport_Import(pyName);

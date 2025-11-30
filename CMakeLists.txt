@@ -63,7 +63,17 @@ configure_file(
     @ONLY
 )
 
+configure_file(
+    ${CMAKE_SOURCE_DIR}/basic_blocks_python.pslkp.yaml.in
+    ${CMAKE_BINARY_DIR}/basic_blocks_python.${PROJECT_VERSION_UNDERSCORE}.pslkp.yaml
+    @ONLY
+)
+
 install(FILES ${CMAKE_BINARY_DIR}/basic_python_support.${PROJECT_VERSION_UNDERSCORE}.pslkbtsp.yaml
+    DESTINATION ${PLUGIN_INSTALL_DIR}
+)
+
+install(FILES ${CMAKE_BINARY_DIR}/basic_blocks_python.${PROJECT_VERSION_UNDERSCORE}.pslkp.yaml
     DESTINATION ${PLUGIN_INSTALL_DIR}
 )
 
