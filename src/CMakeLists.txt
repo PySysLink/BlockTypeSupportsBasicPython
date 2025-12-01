@@ -23,8 +23,11 @@ add_dependencies(BlockTypeSupportsBasicPythonSupport spdlog::spdlog)
 target_link_libraries(BlockTypeSupportsBasicPythonSupport PRIVATE spdlog::spdlog)
 
 
+set(YAML_CPP_STATIC_LIBS TRUE)
+find_package(yaml-cpp REQUIRED)
 
 target_link_libraries(BlockTypeSupportsBasicPythonSupport PRIVATE PySysLinkBase::PySysLinkBase)
+target_link_libraries(BlockTypeSupportsBasicPythonSupport PRIVATE yaml-cpp)
 
 # Include directories for header files
 target_include_directories(BlockTypeSupportsBasicPythonSupport PUBLIC ${PySysLinkBase_INCLUDE_DIRS})

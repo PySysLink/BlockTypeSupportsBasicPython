@@ -26,6 +26,28 @@ public:
         {
             Py_Initialize();
         }
+
+        std::vector<std::string> pythonModulePaths;
+        try {
+            pythonModulePaths = PySysLinkBase::ConfigurationValueManager::TryGetConfigurationValue<std::vector<std::string>>("PythonModulePaths", pluginConfiguration);
+        } catch (std::out_of_range&) {
+            pythonModulePaths.push_back("."); // fallback: current folder
+        }
+
+        PyGILState_STATE gstate = PyGILState_Ensure();
+
+        PyObject* sysPath = PySys_GetObject("path"); // borrowed reference
+
+        for (const auto& pathStr : pythonModulePaths) {
+            PyObject* path = PyUnicode_FromString(pathStr.c_str());
+            if (PyList_Append(sysPath, path) != 0)
+            {
+                spdlog::warn("Failed to append {} to Python sys.path", pathStr);
+            }
+            Py_DECREF(path);
+        }
+            
+        PyGILState_Release(gstate);
     }
 
     std::shared_ptr<PySysLinkBase::ISimulationBlock>
