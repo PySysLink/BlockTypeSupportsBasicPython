@@ -24,12 +24,12 @@ public:
         // Initialize Python interpreter only once
         if (!Py_IsInitialized())
         {
-            Py_Initialize();
+            InitializePython(pluginConfiguration);
         }
 
         std::vector<std::string> pythonModulePaths;
         try {
-            pythonModulePaths = PySysLinkBase::ConfigurationValueManager::TryGetConfigurationValue<std::vector<std::string>>("PythonModulePaths", pluginConfiguration);
+            pythonModulePaths = PySysLinkBase::ConfigurationValueManager::TryGetConfigurationValue<std::vector<std::string>>("BasicPythonSupport/pythonModulePaths", pluginConfiguration);
         } catch (std::out_of_range&) {
             pythonModulePaths.push_back("."); // fallback: current folder
         }
@@ -78,6 +78,34 @@ public:
         {
             throw std::invalid_argument("Unsupported SignalType: " + signalType);
         }
+    }
+private:
+    void InitializePython(const std::map<std::string, PySysLinkBase::ConfigurationValue>& cfg)
+    {
+        PyConfig config;
+        PyConfig_InitPythonConfig(&config);
+
+        try {
+            std::string venv =
+                PySysLinkBase::ConfigurationValueManager::TryGetConfigurationValue<std::string>(
+                    "BasicPythonSupport/venv", cfg);
+
+            std::wstring venvW(venv.begin(), venv.end());
+            PyConfig_SetString(&config, &config.home, venvW.c_str());
+
+            spdlog::info("Using Python venv at {}", venv);
+        } catch (...) {
+            spdlog::info("Using default embedded Python environment");
+        }
+
+        PyStatus status = Py_InitializeFromConfig(&config);
+        if (PyStatus_Exception(status)) {
+            PyConfig_Clear(&config);
+            Py_ExitStatusException(status);
+            throw std::runtime_error("Failed to initialize Python");
+        }
+
+        PyConfig_Clear(&config);
     }
 };
 
